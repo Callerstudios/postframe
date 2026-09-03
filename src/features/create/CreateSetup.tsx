@@ -7,17 +7,25 @@ type CreateSetupProps = {
   type: CreateType;
   initialQuote: string;
   initialAuthor: string;
+  onBack: () => void;
   onQuoteContinue: (quote: string, author: string) => void;
 };
 
 
-function CreateSetup({ type, initialQuote, initialAuthor, onQuoteContinue }: CreateSetupProps) {
+function CreateSetup({ type, initialQuote, initialAuthor, onBack, onQuoteContinue }: CreateSetupProps) {
   const [quote, setQuote] = useState(initialQuote);
   const [author, setAuthor] = useState(initialAuthor);
 
   if (type !== "quote") {
     return (
       <section className="mx-auto max-w-3xl py-8 md:py-16">
+        <button
+          type="button"
+          onClick={onBack}
+          className="mb-4 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
+        >
+          ← Back
+        </button>
         <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
           Create
         </h1>
@@ -31,6 +39,13 @@ function CreateSetup({ type, initialQuote, initialAuthor, onQuoteContinue }: Cre
 
   return (
     <section className="mx-auto max-w-2xl py-8 md:py-16">
+      <button
+        type="button"
+        onClick={onBack}
+        className="mb-4 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
+      >
+        ← Back
+      </button>
       <div className="mb-8">
         <p className="mb-2 text-sm font-medium text-gray-500">Quote</p>
 
@@ -82,8 +97,8 @@ function CreateSetup({ type, initialQuote, initialAuthor, onQuoteContinue }: Cre
             type="button"
             disabled={!quote.trim()}
             onClick={() => {
-                console.log("Quote:", quote, "Author:", author);
-                onQuoteContinue(quote, author)
+              console.log("Quote:", quote, "Author:", author);
+              onQuoteContinue(quote, author);
             }}
             className="min-h-10 rounded-md bg-gray-900 px-5 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
           >

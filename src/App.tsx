@@ -5,44 +5,124 @@ import { createTypeOptions } from "./features/create/createTypes";
 import type { CreateType } from "./features/create/types";
 import CreateSetup from "./features/create/CreateSetup";
 import QuoteEditor from "./features/create/QuoteEditor";
+import SocialPostSetup from "./features/create/SocialPostSetup";
+import type { SocialPostData } from "./features/create/socialPostTypes";
+import SocialPostEditor from "./features/create/SocialPostEditor";
+
+type CreateStep = "select" | "setup" | "editor";
 
 function App() {
   const [selectedType, setSelectedType] = useState<CreateType | null>(null);
   const [confirmedType, setConfirmedType] = useState<CreateType | null>(null);
+
+  const [step, setStep] = useState<CreateStep>("select");
+
   const [quoteData, setQuoteData] = useState({
     quote: "",
     author: "",
   });
-  const [showEditor, setShowEditor] = useState(false);
 
-  if (showEditor) {
+  const [socialPostData, setSocialPostData] = useState<SocialPostData | null>(
+    null,
+  );
+
+  /*
+   * --------------------------------------------------
+   * QUOTE EDITOR
+   * --------------------------------------------------
+   */
+
+  if (step === "editor" && confirmedType === "quote") {
     return (
       <AppShell>
         <QuoteEditor
           initialQuote={quoteData.quote}
           initialAuthor={quoteData.author}
-          onBack={() => setShowEditor(false)}
+          onBack={() => setStep("setup")}
         />
       </AppShell>
     );
   }
 
-  if (confirmedType) {
+  /*
+   * --------------------------------------------------
+   * QUOTE SETUP
+   * --------------------------------------------------
+   */
+
+  if (step === "setup" && confirmedType === "quote") {
     return (
       <AppShell>
         <CreateSetup
-          type={confirmedType}
+          type="quote"
           initialQuote={quoteData.quote}
           initialAuthor={quoteData.author}
+          onBack={() => {
+            setStep("select");
+            setConfirmedType(null);
+          }}
           onQuoteContinue={(quote, author) => {
-            setQuoteData({ quote, author });
-            setShowEditor(true);
+            setQuoteData({
+              quote,
+              author,
+            });
+
+            setStep("editor");
           }}
         />
       </AppShell>
     );
   }
-  
+
+  /*
+   * --------------------------------------------------
+   * SOCIAL POST EDITOR
+   * --------------------------------------------------
+   */
+
+  if (step === "editor" && confirmedType === "social-post") {
+    return (
+      <AppShell>
+        <SocialPostEditor
+          initialData={socialPostData!}
+          onBack={(data) => {
+            setSocialPostData(data);
+            setStep("setup");
+          }}
+        />
+      </AppShell>
+    );
+  }
+
+  /*
+   * --------------------------------------------------
+   * SOCIAL POST SETUP
+   * --------------------------------------------------
+   */
+
+  if (step === "setup" && confirmedType === "social-post") {
+    return (
+      <AppShell>
+        <SocialPostSetup
+          initialData={socialPostData ?? undefined}
+          onBack={() => {
+            setStep("select");
+            setConfirmedType(null);
+          }}
+          onContinue={(data) => {
+            setSocialPostData(data);
+            setStep("editor");
+          }}
+        />
+      </AppShell>
+    );
+  }
+
+  /*
+   * --------------------------------------------------
+   * CREATE TYPE SELECTION
+   * --------------------------------------------------
+   */
 
   return (
     <AppShell>
@@ -69,11 +149,19 @@ function App() {
             />
           ))}
         </div>
+
         <div className="mt-6 flex justify-end">
           <button
             type="button"
             disabled={!selectedType}
-            onClick={() => setConfirmedType(selectedType)}
+            onClick={() => {
+              if (!selectedType) {
+                return;
+              }
+
+              setConfirmedType(selectedType);
+              setStep("setup");
+            }}
             className="min-h-10 rounded-md bg-gray-900 px-5 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
           >
             Continue
