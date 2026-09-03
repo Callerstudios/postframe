@@ -323,7 +323,7 @@ function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
               <div className="flex flex-1 items-center">
                 <p
                   ref={contentRef}
-                  className="whitespace-pre-wrap break-words font-medium leading-snug"
+                  className="whitespace-pre-wrap wrap-break-word font-medium leading-snug"
                   style={{
                     fontSize: `${fontSize}px`,
                   }}
