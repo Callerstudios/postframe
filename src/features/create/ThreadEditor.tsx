@@ -15,51 +15,76 @@ type ThreadPreset = {
   name: string;
   backgroundColor: string;
   textColor: string;
+  numeralColor: string;
   fontFamily: string;
+  fontWeight: string;
 };
 
+type AspectId = "square" | "portrait" | "story";
+
+const ASPECTS: Record<AspectId, { label: string; ratio: string; maxWidth: number }> = {
+  square: { label: "Square", ratio: "1 / 1", maxWidth: 440 },
+  portrait: { label: "Portrait", ratio: "4 / 5", maxWidth: 400 },
+  story: { label: "Story", ratio: "9 / 16", maxWidth: 300 },
+};
+
+// Six cohesive quote-card themes — each one sets background, text, the
+// numeral accent, font and weight together so nothing clashes the way
+// mixed-and-matched presets used to.
 const presets: ThreadPreset[] = [
   {
     id: "clean",
     name: "Clean",
     backgroundColor: "#ffffff",
     textColor: "#171717",
-    fontFamily: "Inter",
+    numeralColor: "rgba(23,23,23,0.08)",
+    fontFamily: "Arial",
+    fontWeight: "500",
+  },
+  {
+    id: "ink",
+    name: "Ink",
+    backgroundColor: "#161616",
+    textColor: "#f5f5f5",
+    numeralColor: "rgba(245,245,245,0.1)",
+    fontFamily: "Arial",
+    fontWeight: "500",
   },
   {
     id: "paper",
     name: "Paper",
-    backgroundColor: "#f5f1e8",
-    textColor: "#292524",
+    backgroundColor: "#f3ead9",
+    textColor: "#3b2f24",
+    numeralColor: "rgba(59,47,36,0.12)",
     fontFamily: "Georgia",
+    fontWeight: "400",
   },
   {
-    id: "dark",
-    name: "Dark",
-    backgroundColor: "#171717",
-    textColor: "#ffffff",
-    fontFamily: "Inter",
-  },
-  {
-    id: "minimal",
-    name: "Minimal",
-    backgroundColor: "#fafafa",
-    textColor: "#404040",
-    fontFamily: "Arial",
-  },
-  {
-    id: "bold",
-    name: "Bold",
-    backgroundColor: "#ffffff",
-    textColor: "#000000",
-    fontFamily: "Arial",
+    id: "sunset",
+    name: "Sunset",
+    backgroundColor: "#ffe3c2",
+    textColor: "#7c2d12",
+    numeralColor: "rgba(124,45,18,0.14)",
+    fontFamily: "Georgia",
+    fontWeight: "400",
   },
   {
     id: "mono",
     name: "Mono",
-    backgroundColor: "#f5f5f5",
-    textColor: "#262626",
+    backgroundColor: "#f2f2f0",
+    textColor: "#1f1f1d",
+    numeralColor: "rgba(31,31,29,0.1)",
     fontFamily: "Courier New",
+    fontWeight: "400",
+  },
+  {
+    id: "bold",
+    name: "Bold",
+    backgroundColor: "#eef14c",
+    textColor: "#111111",
+    numeralColor: "rgba(17,17,17,0.14)",
+    fontFamily: "Arial",
+    fontWeight: "700",
   },
 ];
 
@@ -70,40 +95,109 @@ function splitIntoFrames(text: string) {
     .filter(Boolean);
 }
 
+// Estimates a font size that fills the frame without overflowing, given
+// the card's design-pixel dimensions. Heuristic, not pixel-perfect, but
+// it means every frame reads as intentionally sized instead of using one
+// fixed 16px value regardless of how much text it holds.
+function estimateFitFontSize(text: string, aspect: AspectId) {
+  const width = ASPECTS[aspect].maxWidth;
+  const [rw, rh] = ASPECTS[aspect].ratio.split(" / ").map(Number);
+  const height = (width * rh) / rw;
+
+  const paddingX = 96;
+  const paddingY = 140;
+  const availableW = Math.max(width - paddingX, 120);
+  const availableH = Math.max(height - paddingY, 120);
+
+  const len = Math.max(text.length, 1);
+  const raw = Math.sqrt((availableW * availableH * 0.8) / (0.72 * len));
+
+  return Math.min(56, Math.max(17, Math.round(raw)));
+}
+
+function ChevronLeft() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+      <path
+        d="M15 5 8 12l7 7"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ChevronRight() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+      <path
+        d="M9 5l7 7-7 7"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
   const [text, setText] = useState(initialData.text);
-  const [fontFamily, setFontFamily] = useState("Inter");
+  const [fontFamily, setFontFamily] = useState("Arial");
+  const [fontWeight, setFontWeight] = useState("500");
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [textColor, setTextColor] = useState("#171717");
+  const [numeralColor, setNumeralColor] = useState("rgba(23,23,23,0.08)");
+  const [activePreset, setActivePreset] = useState("clean");
+
+  const [aspect, setAspect] = useState<AspectId>("square");
   const [currentFrame, setCurrentFrame] = useState(0);
-  const [fontSize, setFontSize] = useState(16);
+  const [autoFit, setAutoFit] = useState(true);
+  const [fontSize, setFontSize] = useState(28);
   const [isDownloading, setIsDownloading] = useState(false);
 
   const frameRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLParagraphElement>(null);
 
-  const frames = useMemo(() => {
-    return splitIntoFrames(text);
-  }, [text]);
+const frames = useMemo(() => splitIntoFrames(text), [text]);
 
-  const activeFrame = frames[currentFrame] ?? "";
+const safeCurrentFrame = Math.min(currentFrame, Math.max(0, frames.length - 1));
+
+const activeFrame = frames[safeCurrentFrame] ?? "";
+
+  const fitFontSize = useMemo(
+    () => estimateFitFontSize(activeFrame || "Your text will appear here.", aspect),
+    [activeFrame, aspect],
+  );
+  const displayedFontSize = autoFit ? fitFontSize : fontSize;
 
   const handleBack = () => {
-    onBack({
-      text: text.trim(),
-    });
+    onBack({ text: text.trim() });
   };
 
   const applyPreset = (preset: ThreadPreset) => {
+    setActivePreset(preset.id);
     setFontFamily(preset.fontFamily);
+    setFontWeight(preset.fontWeight);
     setBackgroundColor(preset.backgroundColor);
     setTextColor(preset.textColor);
+    setNumeralColor(preset.numeralColor);
+  };
+
+  const clearPreset = () => setActivePreset("");
+
+  const goTo = (index: number) => {
+    setCurrentFrame(Math.min(Math.max(index, 0), frames.length - 1));
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "ArrowLeft") goTo(currentFrame - 1);
+    if (event.key === "ArrowRight") goTo(currentFrame + 1);
   };
 
   const handleDownload = async () => {
-    if (isDownloading || frames.length === 0) {
-      return;
-    }
+    if (isDownloading || frames.length === 0) return;
 
     setIsDownloading(true);
 
@@ -120,25 +214,20 @@ function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
           });
         });
 
-        if (!frameRef.current) {
-          continue;
-        }
+        if (!frameRef.current) continue;
 
         const dataUrl = await toPng(frameRef.current, {
           pixelRatio: 2,
+          backgroundColor,
         });
 
         const base64 = dataUrl.split(",")[1];
-
         zip.file(`postframe-thread-${index + 1}.png`, base64, { base64: true });
       }
 
       setCurrentFrame(originalFrame);
 
-      const zipBlob = await zip.generateAsync({
-        type: "blob",
-      });
-
+      const zipBlob = await zip.generateAsync({ type: "blob" });
       const url = URL.createObjectURL(zipBlob);
       const link = document.createElement("a");
 
@@ -151,6 +240,9 @@ function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
       setIsDownloading(false);
     }
   };
+
+  const aspectMeta = ASPECTS[aspect];
+ const frameNumberLabel = String(safeCurrentFrame + 1).padStart(2, "0");
 
   return (
     <section className="py-6 md:py-8">
@@ -173,9 +265,9 @@ function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(360px,540px)]">
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div>
-            <h2 className="text-sm font-medium text-gray-900">Content</h2>
+            <h2 className="text-sm font-semibold text-gray-900">Content</h2>
 
             <div className="mt-4">
               <label
@@ -198,30 +290,84 @@ function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
 
               <p className="mt-2 text-xs text-gray-500">
                 Separate paragraphs with a blank line. Each paragraph becomes a
-                frame.
+                frame — {frames.length || 0} so far.
               </p>
             </div>
           </div>
 
           <div>
-            <h2 className="text-sm font-medium text-gray-900">Style</h2>
+            <h2 className="text-sm font-semibold text-gray-900">Format</h2>
+            <p className="mt-1 text-xs text-gray-500">
+              Applies to every frame, so the set stays consistent.
+            </p>
 
-            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {presets.map((preset) => (
+            <div className="mt-3 inline-flex rounded-lg border border-gray-200 p-1">
+              {(Object.keys(ASPECTS) as AspectId[]).map((id) => (
                 <button
-                  key={preset.id}
+                  key={id}
                   type="button"
-                  onClick={() => applyPreset(preset)}
-                  className="min-h-10 rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900"
+                  onClick={() => setAspect(id)}
+                  className={[
+                    "rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors",
+                    aspect === id
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-600 hover:text-gray-900",
+                  ].join(" ")}
                 >
-                  {preset.name}
+                  {ASPECTS[id].label}
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <h2 className="text-sm font-medium text-gray-900">Customization</h2>
+            <h2 className="text-sm font-semibold text-gray-900">Style</h2>
+
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {presets.map((preset) => {
+                const isActive = activePreset === preset.id;
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => applyPreset(preset)}
+                    className={[
+                      "overflow-hidden rounded-lg border text-left transition-all",
+                      isActive
+                        ? "border-gray-900 ring-1 ring-gray-900"
+                        : "border-gray-200 hover:border-gray-400",
+                    ].join(" ")}
+                  >
+                    <div
+                      className="flex h-14 items-center justify-center px-3 text-sm"
+                      style={{
+                        backgroundColor: preset.backgroundColor,
+                        color: preset.textColor,
+                        fontFamily: preset.fontFamily,
+                        fontWeight: preset.fontWeight,
+                      }}
+                    >
+                      Aa
+                    </div>
+
+                    <div className="flex items-center justify-between bg-white px-3 py-2">
+                      <span className="text-sm font-medium text-gray-800">
+                        {preset.name}
+                      </span>
+                      {isActive && (
+                        <span className="text-[11px] font-medium text-gray-500">
+                          Selected
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-sm font-semibold text-gray-900">Typography</h2>
 
             <div className="mt-4 space-y-4">
               <div>
@@ -235,12 +381,38 @@ function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
                 <Select
                   id="thread-font-family"
                   value={fontFamily}
-                  onChange={(event) => setFontFamily(event.target.value)}
+                  onChange={(event) => {
+                    setFontFamily(event.target.value);
+                    clearPreset();
+                  }}
                 >
-                  <option value="Inter">Inter</option>
-                  <option value="Georgia">Georgia</option>
                   <option value="Arial">Arial</option>
+                  <option value="Georgia">Georgia</option>
                   <option value="Courier New">Courier New</option>
+                  <option value="Verdana">Verdana</option>
+                </Select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="thread-font-weight"
+                  className="mb-2 block text-sm font-medium text-gray-900"
+                >
+                  Weight
+                </label>
+
+                <Select
+                  id="thread-font-weight"
+                  value={fontWeight}
+                  onChange={(event) => {
+                    setFontWeight(event.target.value);
+                    clearPreset();
+                  }}
+                >
+                  <option value="400">Regular</option>
+                  <option value="500">Medium</option>
+                  <option value="600">Semibold</option>
+                  <option value="700">Bold</option>
                 </Select>
               </div>
 
@@ -253,53 +425,90 @@ function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
                     Text size
                   </label>
 
-                  <span className="text-xs text-gray-500">{fontSize}px</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs tabular-nums text-gray-500">
+                      {displayedFontSize}px
+                    </span>
+                    {!autoFit && (
+                      <button
+                        type="button"
+                        onClick={() => setAutoFit(true)}
+                        className="text-xs font-medium text-gray-500 underline underline-offset-2 hover:text-gray-900"
+                      >
+                        Reset to auto-fit
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <input
                   id="thread-font-size"
                   type="range"
-                  min="12"
-                  max="48"
+                  min="14"
+                  max="64"
                   step="1"
-                  value={fontSize}
-                  onChange={(event) => setFontSize(Number(event.target.value))}
-                  className="w-full"
+                  value={displayedFontSize}
+                  onChange={(event) => {
+                    setAutoFit(false);
+                    setFontSize(Number(event.target.value));
+                  }}
+                  className="w-full cursor-pointer accent-gray-900"
                 />
+
+                <div className="mt-1 flex justify-between text-xs text-gray-400">
+                  <span>14px</span>
+                  <span>
+                    {autoFit
+                      ? "Auto-fit — sized per frame so text never overflows"
+                      : "64px"}
+                  </span>
+                </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor="thread-background-color"
-                  className="mb-2 block text-sm font-medium text-gray-900"
-                >
-                  Background
-                </label>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="thread-background-color"
+                    className="mb-2 block text-sm font-medium text-gray-900"
+                  >
+                    Background
+                  </label>
 
-                <input
-                  id="thread-background-color"
-                  type="color"
-                  value={backgroundColor}
-                  onChange={(event) => setBackgroundColor(event.target.value)}
-                  className="h-10 w-12 cursor-pointer rounded-md border border-gray-200 bg-white p-1"
-                />
-              </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="thread-background-color"
+                      type="color"
+                      value={backgroundColor}
+                      onChange={(event) => {
+                        setBackgroundColor(event.target.value);
+                        clearPreset();
+                      }}
+                      className="h-10 w-12 cursor-pointer rounded-md border border-gray-200 bg-white p-1"
+                    />
+                  </div>
+                </div>
 
-              <div>
-                <label
-                  htmlFor="thread-text-color"
-                  className="mb-2 block text-sm font-medium text-gray-900"
-                >
-                  Text
-                </label>
+                <div>
+                  <label
+                    htmlFor="thread-text-color"
+                    className="mb-2 block text-sm font-medium text-gray-900"
+                  >
+                    Text
+                  </label>
 
-                <input
-                  id="thread-text-color"
-                  type="color"
-                  value={textColor}
-                  onChange={(event) => setTextColor(event.target.value)}
-                  className="h-10 w-12 cursor-pointer rounded-md border border-gray-200 bg-white p-1"
-                />
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="thread-text-color"
+                      type="color"
+                      value={textColor}
+                      onChange={(event) => {
+                        setTextColor(event.target.value);
+                        clearPreset();
+                      }}
+                      className="h-10 w-12 cursor-pointer rounded-md border border-gray-200 bg-white p-1"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -307,58 +516,116 @@ function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
 
         <div className="lg:sticky lg:top-6 lg:self-start">
           <div
-            ref={frameRef}
-            className="aspect-square w-full overflow-hidden rounded-md border border-gray-200"
-            style={{
-              backgroundColor,
-              color: textColor,
-              fontFamily,
-            }}
+            className="mx-auto"
+            style={{ maxWidth: aspectMeta.maxWidth }}
+            tabIndex={0}
+            onKeyDown={handleKeyDown}
           >
-            <div className="flex h-full w-full flex-col justify-between p-8 md:p-12">
-              <div className="text-xs font-medium uppercase tracking-widest opacity-40">
-                {currentFrame + 1} / {frames.length}
+            {frames.length === 0 ? (
+              <div
+                className="flex w-full items-center justify-center rounded-md border border-dashed border-gray-300 bg-gray-50 p-10 text-center text-sm text-gray-500"
+                style={{ aspectRatio: aspectMeta.ratio }}
+              >
+                Add a blank line between paragraphs to create your first
+                frame.
               </div>
-
-              <div className="flex flex-1 items-center">
-                <p
-                  ref={contentRef}
-                  className="whitespace-pre-wrap wrap-break-word font-medium leading-snug"
+            ) : (
+              <div
+                ref={frameRef}
+                className="relative w-full overflow-hidden rounded-md border border-gray-200"
+                style={{
+                  backgroundColor,
+                  color: textColor,
+                  fontFamily,
+                  aspectRatio: aspectMeta.ratio,
+                }}
+              >
+                {/* Numbered-frame device: the thread's position in its own
+                    sequence, used as the card's one bold visual element. */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -bottom-3 -right-1 select-none font-bold leading-none"
                   style={{
-                    fontSize: `${fontSize}px`,
+                    fontSize: aspect === "story" ? "7rem" : "9rem",
+                    color: numeralColor,
+                    fontFamily,
                   }}
                 >
-                  {activeFrame || "Your text will appear here."}
-                </p>
+                  {frameNumberLabel}
+                </div>
+
+                <div className="relative flex h-full w-full flex-col justify-between p-8 md:p-10">
+                  <div
+                    className="text-xs font-medium tracking-widest opacity-40"
+                    style={{ fontFamily }}
+                  >
+                    {frameNumberLabel} / {String(frames.length).padStart(2, "0")}
+                  </div>
+
+                  <div className="flex flex-1 items-center py-4">
+                    <p
+                      className="whitespace-pre-wrap break-all leading-snug"
+                      style={{
+                        fontSize: `${displayedFontSize}px`,
+                        fontWeight,
+                      }}
+                    >
+                      {activeFrame || "Your text will appear here."}
+                    </p>
+                  </div>
+
+                  <div className="text-sm opacity-40">Postframe</div>
+                </div>
               </div>
+            )}
+          </div>
 
-              <div className="text-sm opacity-40">Postframe</div>
+          {frames.length > 1 && (
+            <div className="mt-4 flex items-center justify-center gap-2">
+              {frames.map((_, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => goTo(index)}
+                  aria-label={`Go to frame ${index + 1}`}
+                  className={[
+                    "h-1.5 rounded-full transition-all",
+                    index === safeCurrentFrame
+                      ? "w-6 bg-gray-900"
+                      : "w-1.5 bg-gray-300 hover:bg-gray-400",
+                  ].join(" ")}
+                />
+              ))}
             </div>
-          </div>
+          )}
 
-          <div className="mt-4 flex items-center justify-between">
-            <button
-              type="button"
-              disabled={currentFrame === 0}
-              onClick={() => setCurrentFrame((frame) => frame - 1)}
-              className="min-h-10 rounded-md border border-gray-200 px-4 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Previous
-            </button>
+          {frames.length > 0 && (
+            <div className="mt-3 flex items-center justify-between">
+              <button
+                type="button"
+                disabled={currentFrame === 0}
+                onClick={() => goTo(currentFrame - 1)}
+                className="inline-flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-700 transition-colors hover:border-gray-400 disabled:cursor-not-allowed disabled:opacity-30"
+                aria-label="Previous frame"
+              >
+                <ChevronLeft />
+              </button>
 
-            <span className="text-sm text-gray-500">
-              Frame {currentFrame + 1} of {frames.length}
-            </span>
+              <span className="text-sm text-gray-500">
+                Frame {safeCurrentFrame + 1} of {frames.length}
+              </span>
 
-            <button
-              type="button"
-              disabled={currentFrame === frames.length - 1}
-              onClick={() => setCurrentFrame((frame) => frame + 1)}
-              className="min-h-10 rounded-md border border-gray-200 px-4 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
+              <button
+                type="button"
+                disabled={currentFrame === frames.length - 1}
+                onClick={() => goTo(currentFrame + 1)}
+                className="inline-flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-700 transition-colors hover:border-gray-400 disabled:cursor-not-allowed disabled:opacity-30"
+                aria-label="Next frame"
+              >
+                <ChevronRight />
+              </button>
+            </div>
+          )}
 
           <button
             type="button"

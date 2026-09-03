@@ -186,7 +186,7 @@ function QuoteEditor({ initialQuote, initialAuthor, onBack }: QuoteEditorProps) 
       </div>
 
       {/* Preview */}
-      <div className="lg:sticky lg:top-6">
+      <div className="">
         <div className="flex min-w-0 items-center justify-center rounded-xl bg-gray-100 p-3 sm:p-6">
           <div
             ref={previewRef}

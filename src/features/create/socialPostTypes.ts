@@ -5,4 +5,4 @@ export type SocialPostData = {
   avatar?: string;
 //   preset: SocialPostPreset;
 };
-export type SocialPostPreset = "x" | "minimal" | "compact" | "editorial";
+// export type SocialPostPreset = "x" | "minimal" | "compact" | "editorial";
