@@ -102,21 +102,23 @@ function splitIntoFrames(text: string) {
 // the card's design-pixel dimensions. Heuristic, not pixel-perfect, but
 // it means every frame reads as intentionally sized instead of using one
 // fixed 16px value regardless of how much text it holds.
-function estimateFitFontSize(text: string, aspect: AspectId) {
-  const width = ASPECTS[aspect].maxWidth;
-  const [rw, rh] = ASPECTS[aspect].ratio.split(" / ").map(Number);
-  const height = (width * rh) / rw;
 
-  const paddingX = 96;
-  const paddingY = 140;
-  const availableW = Math.max(width - paddingX, 120);
-  const availableH = Math.max(height - paddingY, 120);
 
-  const len = Math.max(text.length, 1);
-  const raw = Math.sqrt((availableW * availableH * 0.8) / (0.72 * len));
+// function estimateFitFontSize(text: string, aspect: AspectId) {
+//   const width = ASPECTS[aspect].maxWidth;
+//   const [rw, rh] = ASPECTS[aspect].ratio.split(" / ").map(Number);
+//   const height = (width * rh) / rw;
 
-  return Math.min(56, Math.max(17, Math.round(raw)));
-}
+//   const paddingX = 96;
+//   const paddingY = 140;
+//   const availableW = Math.max(width - paddingX, 120);
+//   const availableH = Math.max(height - paddingY, 120);
+
+//   const len = Math.max(text.length, 1);
+//   const raw = Math.sqrt((availableW * availableH * 0.8) / (0.72 * len));
+
+//   return Math.min(56, Math.max(17, Math.round(raw)));
+// }
 
 function ChevronLeft() {
   return (
@@ -158,7 +160,7 @@ function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
   const [aspect, setAspect] = useState<AspectId>("square");
   const [currentFrame, setCurrentFrame] = useState(0);
   const [autoFit, setAutoFit] = useState(true);
-  const [fontSize, setFontSize] = useState(28);
+  const [fontSize, setFontSize] = useState(16);
   const [isDownloading, setIsDownloading] = useState(false);
 
   const frameRef = useRef<HTMLDivElement>(null);
@@ -172,12 +174,13 @@ function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
 
   const activeFrame = frames[safeCurrentFrame] ?? "";
 
-  const fitFontSize = useMemo(
-    () =>
-      estimateFitFontSize(activeFrame || "Your text will appear here.", aspect),
-    [activeFrame, aspect],
-  );
-  const displayedFontSize = autoFit ? fitFontSize : fontSize;
+  // const fitFontSize = useMemo(
+  //   () =>
+  //     estimateFitFontSize(activeFrame || "Your text will appear here.", aspect),
+  //   [activeFrame, aspect],
+  // );
+  // const displayedFontSize = autoFit ? fitFontSize : fontSize;
+  const displayedFontSize = fontSize;
 
   const handleBack = () => {
     onBack({ text: text.trim() });

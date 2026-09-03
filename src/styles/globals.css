@@ -100,7 +100,7 @@
 
 html {
   font-family: var(--font-family-sans);
-  color: var(--color-gray-900);
+  /* color: var(--color-gray-900); */
   background: var(--color-gray-50);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -111,7 +111,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: var(--color-gray-50);
-  color: var(--color-gray-900);
+  /* color: var(--color-gray-900); */
 }
 
 button,
@@ -163,12 +163,12 @@ h1,
 h2,
 h3,
 h4 {
-  color: var(--color-gray-900);
+  /* color: var(--color-gray-900); */
   font-weight: var(--font-weight-semibold);
   line-height: var(--leading-tight);
 }
 
 p {
-  color: var(--color-gray-600);
+  /* color: var(--color-gray-600); */
   line-height: var(--leading-normal);
 }
