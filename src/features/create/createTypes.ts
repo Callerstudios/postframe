@@ -10,26 +10,16 @@ export const createTypeOptions: CreateTypeOption[] = [
   {
     id: "social-post",
     name: "Social post",
-    description: "Create a visual post for social media.",
+    description: "Create a polished visual for social media.",
   },
   {
     id: "quote",
     name: "Quote",
     description: "Turn a quote into a polished visual.",
   },
-  // {
-  //   id: "announcement",
-  //   name: "Announcement",
-  //   description: "Share an important message or update.",
-  // },
   {
     id: "thread",
-    name: "Thread / Text",
+    name: "Thread",
     description: "Turn longer text into a shareable visual.",
   },
-  // {
-  //   id: "custom",
-  //   name: "Custom",
-  //   description: "Start with a blank canvas.",
-  // },
 ];

@@ -1,64 +1,46 @@
 import { useState } from "react";
-import type { CreateType } from "./types";
 import Input from "../../components/ui/Input";
 import Textarea from "../../components/ui/Textarea";
 
 type CreateSetupProps = {
-  type: CreateType;
   initialQuote: string;
   initialAuthor: string;
   onBack: () => void;
   onQuoteContinue: (quote: string, author: string) => void;
 };
 
-
-function CreateSetup({ type, initialQuote, initialAuthor, onBack, onQuoteContinue }: CreateSetupProps) {
+function QuoteSetup({
+  initialQuote,
+  initialAuthor,
+  onBack,
+  onQuoteContinue,
+}: CreateSetupProps) {
   const [quote, setQuote] = useState(initialQuote);
   const [author, setAuthor] = useState(initialAuthor);
 
-  if (type !== "quote") {
-    return (
-      <section className="mx-auto max-w-3xl py-8 md:py-16">
-        <button
-          type="button"
-          onClick={onBack}
-          className="mb-4 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
-        >
-          ← Back
-        </button>
-        <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-          Create
-        </h1>
-
-        <p className="mt-2 text-base text-gray-600">
-          Setup for this creation type is coming next.
-        </p>
-      </section>
-    );
-  }
-
   return (
-    <section className="mx-auto max-w-2xl py-8 md:py-16">
+    <section className="mx-auto max-w-2xl py-8 md:py-14">
       <button
         type="button"
         onClick={onBack}
-        className="mb-4 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
+        className="mb-8 text-sm font-medium text-gray-500 transition-colors duration-fast hover:text-gray-900"
       >
         ← Back
       </button>
-      <div className="mb-8">
+
+      <div className="mb-10">
         <p className="mb-2 text-sm font-medium text-gray-500">Quote</p>
 
         <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
           Create a quote
         </h1>
 
-        <p className="mt-2 text-base text-gray-600">
+        <p className="mt-2 max-w-lg text-base text-gray-600">
           Add the quote and attribution for your visual.
         </p>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-7">
         <div>
           <label
             htmlFor="quote"
@@ -72,11 +54,12 @@ function CreateSetup({ type, initialQuote, initialAuthor, onBack, onQuoteContinu
             value={quote}
             onChange={(event) => setQuote(event.target.value)}
             placeholder="Enter your quote..."
-            rows={5}
+            rows={7}
+            autoFocus
           />
         </div>
 
-        <div>
+        <div className="max-w-md">
           <label
             htmlFor="author"
             className="mb-2 block text-sm font-medium text-gray-900"
@@ -92,15 +75,12 @@ function CreateSetup({ type, initialQuote, initialAuthor, onBack, onQuoteContinu
           />
         </div>
 
-        <div className="flex justify-end pt-2">
+        <div className="flex justify-end border-t border-gray-200 pt-5">
           <button
             type="button"
             disabled={!quote.trim()}
-            onClick={() => {
-              console.log("Quote:", quote, "Author:", author);
-              onQuoteContinue(quote, author);
-            }}
-            className="min-h-10 rounded-md bg-gray-900 px-5 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
+            onClick={() => onQuoteContinue(quote, author)}
+            className="min-h-10 rounded-md bg-gray-900 px-5 text-sm font-medium text-white transition-colors duration-fast hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
           >
             Continue
           </button>
@@ -110,4 +90,4 @@ function CreateSetup({ type, initialQuote, initialAuthor, onBack, onQuoteContinu
   );
 }
 
-export default CreateSetup;
+export default QuoteSetup;
