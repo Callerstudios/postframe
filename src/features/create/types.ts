@@ -1,6 +1,6 @@
 export type CreateType =
   | "social-post"
   | "quote"
-  | "announcement"
+  // | "announcement"
   | "thread"
-  | "custom";
+  // | "custom";

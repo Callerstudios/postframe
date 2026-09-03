@@ -17,19 +17,19 @@ export const createTypeOptions: CreateTypeOption[] = [
     name: "Quote",
     description: "Turn a quote into a polished visual.",
   },
-  {
-    id: "announcement",
-    name: "Announcement",
-    description: "Share an important message or update.",
-  },
+  // {
+  //   id: "announcement",
+  //   name: "Announcement",
+  //   description: "Share an important message or update.",
+  // },
   {
     id: "thread",
     name: "Thread / Text",
     description: "Turn longer text into a shareable visual.",
   },
-  {
-    id: "custom",
-    name: "Custom",
-    description: "Start with a blank canvas.",
-  },
+  // {
+  //   id: "custom",
+  //   name: "Custom",
+  //   description: "Start with a blank canvas.",
+  // },
 ];

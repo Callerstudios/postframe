@@ -8,6 +8,9 @@ import QuoteEditor from "./features/create/QuoteEditor";
 import SocialPostSetup from "./features/create/SocialPostSetup";
 import type { SocialPostData } from "./features/create/socialPostTypes";
 import SocialPostEditor from "./features/create/SocialPostEditor";
+import type { ThreadData } from "./features/create/threadTypes";
+import ThreadSetup from "./features/create/ThreadSetup";
+import ThreadEditor from "./features/create/ThreadEditor";
 
 type CreateStep = "select" | "setup" | "editor";
 
@@ -25,6 +28,7 @@ function App() {
   const [socialPostData, setSocialPostData] = useState<SocialPostData | null>(
     null,
   );
+  const [threadData, setThreadData] = useState<ThreadData | null>(null);
 
   /*
    * --------------------------------------------------
@@ -111,6 +115,48 @@ function App() {
           }}
           onContinue={(data) => {
             setSocialPostData(data);
+            setStep("editor");
+          }}
+        />
+      </AppShell>
+    );
+  }
+  /*
+   * --------------------------------------------------
+   * THREAD EDITOR
+   * --------------------------------------------------
+   */
+
+  if (step === "editor" && confirmedType === "thread") {
+    return (
+      <AppShell>
+        <ThreadEditor
+          initialData={threadData!}
+          onBack={(data) => {
+            setThreadData(data);
+            setStep("setup");
+          }}
+        />
+      </AppShell>
+    );
+  }
+  /*
+   * --------------------------------------------------
+   * THREAD SETUP
+   * --------------------------------------------------
+   */
+
+  if (step === "setup" && confirmedType === "thread") {
+    return (
+      <AppShell>
+        <ThreadSetup
+          initialData={threadData ?? undefined}
+          onBack={() => {
+            setStep("select");
+            setConfirmedType(null);
+          }}
+          onContinue={(data) => {
+            setThreadData(data);
             setStep("editor");
           }}
         />
