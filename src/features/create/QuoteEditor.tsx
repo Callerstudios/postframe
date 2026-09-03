@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import Input from "../../components/ui/Input";
 import Textarea from "../../components/ui/Textarea";
 import Select from "../../components/ui/Select";
+import { toPng } from "html-to-image";
 
 type QuoteEditorProps = {
   initialQuote: string;
   initialAuthor: string;
+  onBack: () => void;
 };
 
 type TextAlign = "left" | "center" | "right";
@@ -14,7 +16,6 @@ type StylePreset = {
   id: string;
   name: string;
   fontFamily: string;
-  fontSize: number;
   textAlign: TextAlign;
   backgroundColor: string;
   textColor: string;
@@ -25,7 +26,6 @@ const STYLE_PRESETS: StylePreset[] = [
     id: "classic",
     name: "Classic",
     fontFamily: "Georgia",
-    fontSize: 48,
     textAlign: "center",
     backgroundColor: "#ffffff",
     textColor: "#171717",
@@ -34,7 +34,6 @@ const STYLE_PRESETS: StylePreset[] = [
     id: "minimal",
     name: "Minimal",
     fontFamily: "Inter",
-    fontSize: 44,
     textAlign: "left",
     backgroundColor: "#f5f5f5",
     textColor: "#171717",
@@ -43,7 +42,6 @@ const STYLE_PRESETS: StylePreset[] = [
     id: "elegant",
     name: "Elegant",
     fontFamily: "Georgia",
-    fontSize: 46,
     textAlign: "center",
     backgroundColor: "#faf7f2",
     textColor: "#3f3f46",
@@ -52,7 +50,6 @@ const STYLE_PRESETS: StylePreset[] = [
     id: "bold",
     name: "Bold",
     fontFamily: "Arial",
-    fontSize: 52,
     textAlign: "left",
     backgroundColor: "#fef3c7",
     textColor: "#18181b",
@@ -61,7 +58,6 @@ const STYLE_PRESETS: StylePreset[] = [
     id: "dark",
     name: "Dark",
     fontFamily: "Inter",
-    fontSize: 48,
     textAlign: "center",
     backgroundColor: "#18181b",
     textColor: "#ffffff",
@@ -70,14 +66,13 @@ const STYLE_PRESETS: StylePreset[] = [
     id: "typewriter",
     name: "Typewriter",
     fontFamily: "Courier New",
-    fontSize: 38,
     textAlign: "left",
     backgroundColor: "#f5f5f4",
     textColor: "#292524",
   },
 ];
 
-function QuoteEditor({ initialQuote, initialAuthor }: QuoteEditorProps) {
+function QuoteEditor({ initialQuote, initialAuthor, onBack }: QuoteEditorProps) {
   const [quote, setQuote] = useState(initialQuote);
   const [author, setAuthor] = useState(initialAuthor);
 
@@ -91,71 +86,92 @@ function QuoteEditor({ initialQuote, initialAuthor }: QuoteEditorProps) {
   const [showCustomize, setShowCustomize] = useState(false);
   const [showContentEditor, setShowContentEditor] = useState(false);
 
-  const previewRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const quoteRef = useRef<HTMLParagraphElement>(null);
 
   /*
-   * Automatically determine a good initial font size.
+   * Initial font-size calculation.
    *
-   * This runs only once when the editor opens.
-   * After that, the user's selected font size is respected.
+   * Runs ONLY once.
    */
   useEffect(() => {
-    const preview = previewRef.current;
     const content = contentRef.current;
     const quoteElement = quoteRef.current;
 
-    if (!preview || !content || !quoteElement) {
+    if (!content || !quoteElement) {
       return;
     }
 
-    const availableHeight = content.clientHeight;
     const availableWidth = content.clientWidth;
 
-    if (!availableHeight || !availableWidth) {
+    if (!availableWidth) {
       return;
     }
 
-    const minimumSize = 16;
     const maximumSize = 96;
+    const minimumSize = 16;
 
-    let size = Math.min(availableWidth * 0.08, maximumSize);
-    size = Math.max(size, minimumSize);
+    let initialSize = Math.min(availableWidth * 0.08, maximumSize);
+    initialSize = Math.max(initialSize, minimumSize);
 
-    quoteElement.style.fontSize = `${size}px`;
+    quoteElement.style.fontSize = `${initialSize}px`;
 
     while (
-      (quoteElement.scrollHeight > availableHeight ||
-        quoteElement.scrollWidth > availableWidth) &&
-      size > minimumSize
+      (quoteElement.scrollHeight > content.clientHeight ||
+        quoteElement.scrollWidth > content.clientWidth) &&
+      initialSize > minimumSize
     ) {
-      size -= 1;
-      quoteElement.style.fontSize = `${size}px`;
+      initialSize -= 1;
+      quoteElement.style.fontSize = `${initialSize}px`;
     }
 
-    setFontSize(size);
+    setFontSize(initialSize);
   }, []);
 
+  const handleDownload = async () => {
+    if (!previewRef.current) {
+      return;
+    }
+
+    const dataUrl = await toPng(previewRef.current, {
+      pixelRatio: 2,
+    });
+
+    const link = document.createElement("a");
+    link.download = "postframe-quote.png";
+    link.href = dataUrl;
+    link.click();
+  };
+
+  /*
+   * Apply a preset.
+   *
+   * The preset controls the visual design.
+   * Font size is still calculated against the CURRENT preview size.
+   */
   const applyPreset = (preset: StylePreset) => {
     setActivePreset(preset.id);
+
     setFontFamily(preset.fontFamily);
-    setFontSize(preset.fontSize);
     setTextAlign(preset.textAlign);
     setBackgroundColor(preset.backgroundColor);
     setTextColor(preset.textColor);
   };
 
-  const updateCustomValue = <T,>(
-    setter: React.Dispatch<React.SetStateAction<T>>,
-    value: T,
-  ) => {
-    setter(value);
+  const markAsCustom = () => {
     setActivePreset("");
   };
 
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 md:py-10">
+      <button
+        type="button"
+        onClick={onBack}
+        className="mb-4 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
+      >
+        ← Back
+      </button>
       {/* Header */}
       <div className="mb-6">
         <p className="mb-2 text-sm font-medium text-gray-500">Quote</p>
@@ -169,14 +185,12 @@ function QuoteEditor({ initialQuote, initialAuthor }: QuoteEditorProps) {
         </p>
       </div>
 
-      {/* =========================
-          PREVIEW
-      ========================== */}
+      {/* Preview */}
       <div className="lg:sticky lg:top-6">
         <div className="flex min-w-0 items-center justify-center rounded-xl bg-gray-100 p-3 sm:p-6">
           <div
             ref={previewRef}
-            className="relative flex aspect-square w-full max-w-[560px] items-center justify-center overflow-hidden p-6 shadow-lg sm:p-10 md:p-12"
+            className="relative flex aspect-square w-full max-w-140 items-center justify-center overflow-hidden p-6 shadow-lg sm:p-10 md:p-12"
             style={{
               backgroundColor,
             }}
@@ -218,16 +232,15 @@ function QuoteEditor({ initialQuote, initialAuthor }: QuoteEditorProps) {
         <button
           type="button"
           className="mt-4 flex h-12 w-full items-center justify-center rounded-lg bg-gray-900 px-5 text-sm font-medium text-white transition hover:bg-gray-800"
+          onClick={handleDownload}
         >
           Download quote
         </button>
       </div>
 
-      {/* =========================
-          CONTROLS
-      ========================== */}
+      {/* Controls */}
       <div className="mt-10 border-t border-gray-200 pt-8">
-        {/* Content editor */}
+        {/* Content */}
         <div className="border-b border-gray-200 pb-6">
           <button
             type="button"
@@ -344,9 +357,7 @@ function QuoteEditor({ initialQuote, initialAuthor }: QuoteEditorProps) {
             aria-expanded={showCustomize}
           >
             <div>
-              <h2 className="text-sm font-semibold text-gray-900">
-                Customize
-              </h2>
+              <h2 className="text-sm font-semibold text-gray-900">Customize</h2>
 
               <p className="mt-1 text-xs text-gray-500">
                 Fine-tune the font, size, colors, and alignment.
@@ -372,9 +383,10 @@ function QuoteEditor({ initialQuote, initialAuthor }: QuoteEditorProps) {
                 <Select
                   id="font-family"
                   value={fontFamily}
-                  onChange={(event) =>
-                    updateCustomValue(setFontFamily, event.target.value)
-                  }
+                  onChange={(event) => {
+                    setFontFamily(event.target.value);
+                    markAsCustom();
+                  }}
                 >
                   <option value="Inter">Inter</option>
                   <option value="Georgia">Georgia</option>
@@ -393,9 +405,7 @@ function QuoteEditor({ initialQuote, initialAuthor }: QuoteEditorProps) {
                     Font size
                   </label>
 
-                  <span className="text-sm text-gray-500">
-                    {fontSize}px
-                  </span>
+                  <span className="text-sm text-gray-500">{fontSize}px</span>
                 </div>
 
                 <input
@@ -404,12 +414,10 @@ function QuoteEditor({ initialQuote, initialAuthor }: QuoteEditorProps) {
                   min="16"
                   max="96"
                   value={fontSize}
-                  onChange={(event) =>
-                    updateCustomValue(
-                      setFontSize,
-                      Number(event.target.value),
-                    )
-                  }
+                  onChange={(event) => {
+                    setFontSize(Number(event.target.value));
+                    markAsCustom();
+                  }}
                   className="w-full"
                 />
               </div>
@@ -425,9 +433,10 @@ function QuoteEditor({ initialQuote, initialAuthor }: QuoteEditorProps) {
                     <button
                       key={alignment}
                       type="button"
-                      onClick={() =>
-                        updateCustomValue(setTextAlign, alignment)
-                      }
+                      onClick={() => {
+                        setTextAlign(alignment);
+                        markAsCustom();
+                      }}
                       className={`min-h-10 rounded-md border px-3 text-sm capitalize transition ${
                         textAlign === alignment
                           ? "border-gray-900 bg-gray-900 text-white"
@@ -454,23 +463,19 @@ function QuoteEditor({ initialQuote, initialAuthor }: QuoteEditorProps) {
                     id="background-color"
                     type="color"
                     value={backgroundColor}
-                    onChange={(event) =>
-                      updateCustomValue(
-                        setBackgroundColor,
-                        event.target.value,
-                      )
-                    }
+                    onChange={(event) => {
+                      setBackgroundColor(event.target.value);
+                      markAsCustom();
+                    }}
                     className="h-10 w-12 shrink-0 cursor-pointer rounded-md border border-gray-200 bg-white p-1"
                   />
 
                   <Input
                     value={backgroundColor}
-                    onChange={(event) =>
-                      updateCustomValue(
-                        setBackgroundColor,
-                        event.target.value,
-                      )
-                    }
+                    onChange={(event) => {
+                      setBackgroundColor(event.target.value);
+                      markAsCustom();
+                    }}
                     aria-label="Background color"
                   />
                 </div>
@@ -490,17 +495,19 @@ function QuoteEditor({ initialQuote, initialAuthor }: QuoteEditorProps) {
                     id="text-color"
                     type="color"
                     value={textColor}
-                    onChange={(event) =>
-                      updateCustomValue(setTextColor, event.target.value)
-                    }
+                    onChange={(event) => {
+                      setTextColor(event.target.value);
+                      markAsCustom();
+                    }}
                     className="h-10 w-12 shrink-0 cursor-pointer rounded-md border border-gray-200 bg-white p-1"
                   />
 
                   <Input
                     value={textColor}
-                    onChange={(event) =>
-                      updateCustomValue(setTextColor, event.target.value)
-                    }
+                    onChange={(event) => {
+                      setTextColor(event.target.value);
+                      markAsCustom();
+                    }}
                     aria-label="Text color"
                   />
                 </div>

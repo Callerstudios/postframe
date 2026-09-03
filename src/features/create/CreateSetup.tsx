@@ -5,13 +5,15 @@ import Textarea from "../../components/ui/Textarea";
 
 type CreateSetupProps = {
   type: CreateType;
+  initialQuote: string;
+  initialAuthor: string;
   onQuoteContinue: (quote: string, author: string) => void;
 };
 
 
-function CreateSetup({ type, onQuoteContinue }: CreateSetupProps) {
-  const [quote, setQuote] = useState("");
-  const [author, setAuthor] = useState("");
+function CreateSetup({ type, initialQuote, initialAuthor, onQuoteContinue }: CreateSetupProps) {
+  const [quote, setQuote] = useState(initialQuote);
+  const [author, setAuthor] = useState(initialAuthor);
 
   if (type !== "quote") {
     return (

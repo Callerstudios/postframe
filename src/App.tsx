@@ -9,17 +9,19 @@ import QuoteEditor from "./features/create/QuoteEditor";
 function App() {
   const [selectedType, setSelectedType] = useState<CreateType | null>(null);
   const [confirmedType, setConfirmedType] = useState<CreateType | null>(null);
-  const [quoteData, setQuoteData] = useState<{
-    quote: string;
-    author: string;
-  } | null>(null);
+  const [quoteData, setQuoteData] = useState({
+    quote: "",
+    author: "",
+  });
+  const [showEditor, setShowEditor] = useState(false);
 
-  if (quoteData) {
+  if (showEditor) {
     return (
       <AppShell>
         <QuoteEditor
           initialQuote={quoteData.quote}
           initialAuthor={quoteData.author}
+          onBack={() => setShowEditor(false)}
         />
       </AppShell>
     );
@@ -30,7 +32,12 @@ function App() {
       <AppShell>
         <CreateSetup
           type={confirmedType}
-          onQuoteContinue={(quote, author) => setQuoteData({ quote, author })}
+          initialQuote={quoteData.quote}
+          initialAuthor={quoteData.author}
+          onQuoteContinue={(quote, author) => {
+            setQuoteData({ quote, author });
+            setShowEditor(true);
+          }}
         />
       </AppShell>
     );
