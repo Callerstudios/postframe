@@ -3,4 +3,5 @@ export type CreateType =
   | "quote"
   // | "announcement"
   | "thread"
+  | "code-post"
   // | "custom";

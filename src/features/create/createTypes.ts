@@ -22,4 +22,9 @@ export const createTypeOptions: CreateTypeOption[] = [
     name: "Thread",
     description: "Turn longer text into a shareable visual.",
   },
+  {
+    id: "code-post",
+    name: "Code post",
+    description: "Share code with clear explanations and context.",
+  },
 ];

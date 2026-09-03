@@ -6,9 +6,12 @@ import SocialPostSetup from "./SocialPostSetup";
 import SocialPostEditor from "./SocialPostEditor";
 import type { SocialPostData } from "./socialPostTypes";
 import ThreadSetup from "./ThreadSetup";
-import ThreadEditor from "./ThreadEditor";
 import type { ThreadData } from "./threadTypes";
 import { CreateTypeSelection } from "./CreateTypeSelection";
+import ThreadEditor from "./ThreadEditor";
+import CodePostEditor from "./CodePostEditor";
+import CodePostSetup from "./CodePostSetup";
+import type { CodePostData } from "./codePostTypes";
 
 type CreateStep = "select" | "setup" | "editor";
 
@@ -27,6 +30,7 @@ function CreateFlow() {
   );
 
   const [threadData, setThreadData] = useState<ThreadData | null>(null);
+  const [codePostData, setCodePostData] = useState<CodePostData | null>(null);
 
   const handleBackToSelection = () => {
     setStep("select");
@@ -101,6 +105,34 @@ function CreateFlow() {
         onBack={handleBackToSelection}
         onContinue={(data) => {
           setSocialPostData(data);
+          setStep("editor");
+        }}
+      />
+    );
+  }
+  /*
+   * --------------------------------------------------
+   * CODE POST
+   * --------------------------------------------------
+   */
+  if (step === "editor" && confirmedType === "code-post") {
+    return (
+      <CodePostEditor
+        initialData={codePostData!}
+        onBack={(data) => {
+          setCodePostData(data);
+          setStep("setup");
+        }}
+      />
+    );
+  }
+  if (step === "setup" && confirmedType === "code-post") {
+    return (
+      <CodePostSetup
+        initialData={codePostData ?? { blocks: [] }}
+        onBack={handleBackToSelection}
+        onContinue={(data) => {
+          setCodePostData(data);
           setStep("editor");
         }}
       />

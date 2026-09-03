@@ -22,7 +22,10 @@ type ThreadPreset = {
 
 type AspectId = "square" | "portrait" | "story";
 
-const ASPECTS: Record<AspectId, { label: string; ratio: string; maxWidth: number }> = {
+const ASPECTS: Record<
+  AspectId,
+  { label: string; ratio: string; maxWidth: number }
+> = {
   square: { label: "Square", ratio: "1 / 1", maxWidth: 440 },
   portrait: { label: "Portrait", ratio: "4 / 5", maxWidth: 400 },
   story: { label: "Story", ratio: "9 / 16", maxWidth: 300 },
@@ -160,14 +163,18 @@ function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
 
   const frameRef = useRef<HTMLDivElement>(null);
 
-const frames = useMemo(() => splitIntoFrames(text), [text]);
+  const frames = useMemo(() => splitIntoFrames(text), [text]);
 
-const safeCurrentFrame = Math.min(currentFrame, Math.max(0, frames.length - 1));
+  const safeCurrentFrame = Math.min(
+    currentFrame,
+    Math.max(0, frames.length - 1),
+  );
 
-const activeFrame = frames[safeCurrentFrame] ?? "";
+  const activeFrame = frames[safeCurrentFrame] ?? "";
 
   const fitFontSize = useMemo(
-    () => estimateFitFontSize(activeFrame || "Your text will appear here.", aspect),
+    () =>
+      estimateFitFontSize(activeFrame || "Your text will appear here.", aspect),
     [activeFrame, aspect],
   );
   const displayedFontSize = autoFit ? fitFontSize : fontSize;
@@ -242,7 +249,7 @@ const activeFrame = frames[safeCurrentFrame] ?? "";
   };
 
   const aspectMeta = ASPECTS[aspect];
- const frameNumberLabel = String(safeCurrentFrame + 1).padStart(2, "0");
+  const frameNumberLabel = String(safeCurrentFrame + 1).padStart(2, "0");
 
   return (
     <section className="py-6 md:py-8">
@@ -526,8 +533,7 @@ const activeFrame = frames[safeCurrentFrame] ?? "";
                 className="flex w-full items-center justify-center rounded-md border border-dashed border-gray-300 bg-gray-50 p-10 text-center text-sm text-gray-500"
                 style={{ aspectRatio: aspectMeta.ratio }}
               >
-                Add a blank line between paragraphs to create your first
-                frame.
+                Add a blank line between paragraphs to create your first frame.
               </div>
             ) : (
               <div
@@ -559,7 +565,8 @@ const activeFrame = frames[safeCurrentFrame] ?? "";
                     className="text-xs font-medium tracking-widest opacity-40"
                     style={{ fontFamily }}
                   >
-                    {frameNumberLabel} / {String(frames.length).padStart(2, "0")}
+                    {frameNumberLabel} /{" "}
+                    {String(frames.length).padStart(2, "0")}
                   </div>
 
                   <div className="flex flex-1 items-center py-4">

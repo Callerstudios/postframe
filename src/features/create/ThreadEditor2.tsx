@@ -70,7 +70,7 @@ function splitIntoFrames(text: string) {
     .filter(Boolean);
 }
 
-function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
+function ThreadEditor2({ initialData, onBack }: ThreadEditorProps) {
   const [text, setText] = useState(initialData.text);
   const [fontFamily, setFontFamily] = useState("Inter");
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
@@ -374,4 +374,4 @@ function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
   );
 }
 
-export default ThreadEditor;
+export default ThreadEditor2;
