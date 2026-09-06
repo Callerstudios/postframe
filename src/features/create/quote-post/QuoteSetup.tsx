@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Input from "../../components/ui/Input";
-import Textarea from "../../components/ui/Textarea";
+import Input from "../../../components/ui/Input";
+import Textarea from "../../../components/ui/Textarea";
 
 type CreateSetupProps = {
   initialQuote: string;

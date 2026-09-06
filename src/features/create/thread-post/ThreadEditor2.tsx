@@ -1,8 +1,8 @@
 import { useMemo, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import JSZip from "jszip";
-import Textarea from "../../components/ui/Textarea";
-import Select from "../../components/ui/Select";
+import Textarea from "../../../components/ui/Textarea";
+import Select from "../../../components/ui/Select";
 import type { ThreadData } from "./threadTypes";
 
 type ThreadEditorProps = {

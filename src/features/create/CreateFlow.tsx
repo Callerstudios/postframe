@@ -1,17 +1,17 @@
 import { useState } from "react";
 import type { CreateType } from "./types";
-import QuoteSetup from "./QuoteSetup";
-import QuoteEditor from "./QuoteEditor";
-import SocialPostSetup from "./SocialPostSetup";
-import SocialPostEditor from "./SocialPostEditor";
-import type { SocialPostData } from "./socialPostTypes";
-import ThreadSetup from "./ThreadSetup";
-import type { ThreadData } from "./threadTypes";
+import QuoteSetup from "./quote-post/QuoteSetup";
+import QuoteEditor from "./quote-post/QuoteEditor";
+import SocialPostSetup from "./social-media-post/SocialPostSetup";
+import SocialPostEditor from "./social-media-post/SocialPostEditor";
+import type { SocialPostData } from "./social-media-post/socialPostTypes";
+import ThreadSetup from "./thread-post/ThreadSetup";
+import type { ThreadData } from "./thread-post/threadTypes";
 import { CreateTypeSelection } from "./CreateTypeSelection";
-import ThreadEditor from "./ThreadEditor";
-import CodePostEditor from "./CodePostEditor";
-import CodePostSetup from "./CodePostSetup";
-import type { CodePostData } from "./codePostTypes";
+import ThreadEditor from "./thread-post/ThreadEditor";
+import type { CodePostData } from "./code-post/codePostTypes";
+import CodePostSetup from "./code-post/CodePostSetup";
+import CodePostEditor from "./code-post/CodePostEditor";
 
 type CreateStep = "select" | "setup" | "editor";
 

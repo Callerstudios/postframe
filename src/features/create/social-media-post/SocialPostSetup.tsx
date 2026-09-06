@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Input from "../../components/ui/Input";
-import Textarea from "../../components/ui/Textarea";
+import Input from "../../../components/ui/Input";
+import Textarea from "../../../components/ui/Textarea";
 import type { SocialPostData } from "./socialPostTypes";
 
 type SocialPostSetupProps = {
@@ -19,7 +19,7 @@ function SocialPostSetup({
     initialData?.displayName ?? "",
   );
   const [username, setUsername] = useState(initialData?.username ?? "");
-//   const [avatar, setAvatar] = useState(initialData?.avatar ?? "");
+  //   const [avatar, setAvatar] = useState(initialData?.avatar ?? "");
 
   const canContinue = text.trim() && displayName.trim();
 

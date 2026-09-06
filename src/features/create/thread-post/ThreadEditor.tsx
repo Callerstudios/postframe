@@ -1,9 +1,10 @@
 import { useMemo, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import JSZip from "jszip";
-import Textarea from "../../components/ui/Textarea";
-import Select from "../../components/ui/Select";
+import Textarea from "../../../components/ui/Textarea";
+import Select from "../../../components/ui/Select";
 import type { ThreadData } from "./threadTypes";
+import { track } from "@vercel/analytics/nuxt/runtime";
 
 type ThreadEditorProps = {
   initialData: ThreadData;
@@ -102,7 +103,6 @@ function splitIntoFrames(text: string) {
 // the card's design-pixel dimensions. Heuristic, not pixel-perfect, but
 // it means every frame reads as intentionally sized instead of using one
 // fixed 16px value regardless of how much text it holds.
-
 
 // function estimateFitFontSize(text: string, aspect: AspectId) {
 //   const width = ASPECTS[aspect].maxWidth;
@@ -214,7 +214,10 @@ function ThreadEditor({ initialData, onBack }: ThreadEditorProps) {
     try {
       const zip = new JSZip();
       const originalFrame = currentFrame;
-
+      track("image_download", {
+        format: "png",
+        template: "thread_post",
+      });
       for (let index = 0; index < frames.length; index += 1) {
         setCurrentFrame(index);
 

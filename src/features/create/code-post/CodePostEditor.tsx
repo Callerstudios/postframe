@@ -1,9 +1,10 @@
 import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
-import Textarea from "../../components/ui/Textarea";
-import Select from "../../components/ui/Select";
 import type { Block, CodeBlock, CodePostData, TextBlock } from "./codePostTypes";
 import { LANGUAGES, tokenize } from "./codeHighlight";
+import { track } from "@vercel/analytics/nuxt/runtime";
+import Select from "../../../components/ui/Select";
+import Textarea from "../../../components/ui/Textarea";
 
 type CodePostEditorProps = {
   initialData: CodePostData;
@@ -202,6 +203,10 @@ function CodePostEditor({ initialData, onBack }: CodePostEditorProps) {
         cacheBust: true,
         pixelRatio: 2,
         backgroundColor: theme.backgroundColor,
+      });
+      track("image_download", {
+        format: "png",
+        template: "code_post",
       });
       const link = document.createElement("a");
       link.download = "postframe-code-post.png";

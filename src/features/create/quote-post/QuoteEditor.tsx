@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import Input from "../../components/ui/Input";
-import Textarea from "../../components/ui/Textarea";
-import Select from "../../components/ui/Select";
+import Input from "../../../components/ui/Input";
+import Textarea from "../../../components/ui/Textarea";
+import Select from "../../../components/ui/Select";
 import { toPng } from "html-to-image";
+import { track } from "@vercel/analytics/nuxt/runtime";
 
 type QuoteEditorProps = {
   initialQuote: string;
@@ -72,7 +73,11 @@ const STYLE_PRESETS: StylePreset[] = [
   },
 ];
 
-function QuoteEditor({ initialQuote, initialAuthor, onBack }: QuoteEditorProps) {
+function QuoteEditor({
+  initialQuote,
+  initialAuthor,
+  onBack,
+}: QuoteEditorProps) {
   const [quote, setQuote] = useState(initialQuote);
   const [author, setAuthor] = useState(initialAuthor);
 
@@ -136,6 +141,10 @@ function QuoteEditor({ initialQuote, initialAuthor, onBack }: QuoteEditorProps) 
 
     const dataUrl = await toPng(previewRef.current, {
       pixelRatio: 2,
+    });
+    track("image_download", {
+      format: "png",
+      template: "quote_post",
     });
 
     const link = document.createElement("a");

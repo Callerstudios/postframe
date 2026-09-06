@@ -1,7 +1,7 @@
 import { useState } from "react";
-import Button from "../../components/ui/Button";
-import Textarea from "../../components/ui/Textarea";
 import type { CodePostData } from "./codePostTypes";
+import Button from "../../../components/ui/Button";
+import Textarea from "../../../components/ui/Textarea";
 
 type CodePostSetupProps = {
   initialData: CodePostData;

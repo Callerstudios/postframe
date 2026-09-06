@@ -1,20 +1,23 @@
 import { useMemo, useRef, useState } from "react";
-import Input from "../../components/ui/Input";
-import Textarea from "../../components/ui/Textarea";
-import Select from "../../components/ui/Select";
+import Input from "../../../components/ui/Input";
+import Textarea from "../../../components/ui/Textarea";
+import Select from "../../../components/ui/Select";
 import type { SocialPostData } from "./socialPostTypes";
 import { toPng } from "html-to-image";
-import {presets, type SocialPostPreset} from "./SocialMediaPresets";
-import { LikeIcon, ReplyIcon, RepostIcon, ShareIcon, VerifiedBadge } from "./icons";
-
-
+import { presets, type SocialPostPreset } from "./SocialMediaPresets";
+import {
+  LikeIcon,
+  ReplyIcon,
+  RepostIcon,
+  ShareIcon,
+  VerifiedBadge,
+} from "../icons";
+import { track } from "@vercel/analytics";
 
 type SocialPostEditorProps = {
   initialData: SocialPostData;
   onBack: (currentData: SocialPostData) => void;
 };
-
-
 
 function autoFontSize(text: string) {
   const len = text.length || 1;
@@ -83,7 +86,10 @@ function SocialPostEditor({ initialData, onBack }: SocialPostEditorProps) {
         imagePlaceholder:
           "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
       });
-
+      track("image_download", {
+        format: "png",
+        template: "social_post",
+      });
       const link = document.createElement("a");
       link.download = "social-post.png";
       link.href = dataUrl;
@@ -144,12 +150,12 @@ function SocialPostEditor({ initialData, onBack }: SocialPostEditorProps) {
             {/* Generated image — width is fixed like a real post embed,
                 height grows naturally with the content instead of being
                 forced into a square. */}
-            <div
-              ref={previewRef}
-              className="mx-auto w-full max-w-130 overflow-hidden rounded-2xl"
-              style={{ backgroundColor, color: textColor, fontFamily }}
-            >
-              <div className="flex flex-col gap-3 p-6 sm:p-7">
+            <div className="mx-auto w-full max-w-130 overflow-hidden rounded-2xl">
+              <div
+                className="flex flex-col gap-3 p-6 sm:p-7"
+                ref={previewRef}
+                style={{ backgroundColor, color: textColor, fontFamily }}
+              >
                 {/* PROFILE HEADER */}
                 <div className="flex items-start gap-3">
                   {avatar ? (

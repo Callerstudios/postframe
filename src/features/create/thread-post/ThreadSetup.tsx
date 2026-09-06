@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Textarea from "../../components/ui/Textarea";
+import Textarea from "../../../components/ui/Textarea";
 import type { ThreadData } from "./threadTypes";
 
 type ThreadSetupProps = {
