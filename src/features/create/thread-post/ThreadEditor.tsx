@@ -4,7 +4,7 @@ import JSZip from "jszip";
 import Textarea from "../../../components/ui/Textarea";
 import Select from "../../../components/ui/Select";
 import type { ThreadData } from "./threadTypes";
-import { track } from "@vercel/analytics/nuxt/runtime";
+import { track } from "@vercel/analytics/react";
 
 type ThreadEditorProps = {
   initialData: ThreadData;

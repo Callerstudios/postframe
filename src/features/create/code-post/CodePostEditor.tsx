@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import type { Block, CodeBlock, CodePostData, TextBlock } from "./codePostTypes";
 import { LANGUAGES, tokenize } from "./codeHighlight";
-import { track } from "@vercel/analytics/nuxt/runtime";
+import { track } from "@vercel/analytics/react";
 import Select from "../../../components/ui/Select";
 import Textarea from "../../../components/ui/Textarea";
 

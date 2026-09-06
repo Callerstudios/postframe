@@ -3,7 +3,7 @@ import Input from "../../../components/ui/Input";
 import Textarea from "../../../components/ui/Textarea";
 import Select from "../../../components/ui/Select";
 import { toPng } from "html-to-image";
-import { track } from "@vercel/analytics/nuxt/runtime";
+import { track } from "@vercel/analytics/react";
 
 type QuoteEditorProps = {
   initialQuote: string;

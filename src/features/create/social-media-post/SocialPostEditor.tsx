@@ -12,7 +12,7 @@ import {
   ShareIcon,
   VerifiedBadge,
 } from "../icons";
-import { track } from "@vercel/analytics";
+import { track } from "@vercel/analytics/react";
 
 type SocialPostEditorProps = {
   initialData: SocialPostData;
