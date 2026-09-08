@@ -224,7 +224,7 @@ function QuoteEditor({
               </div>
               <p
                 ref={quoteRef}
-                className="max-w-full wrap-break-word font-semibold leading-tight"
+                className="max-w-full wrap-break-word whitespace-pre-wrap font-semibold leading-tight"
                 style={{
                   fontSize: `${fontSize}px`,
                   fontFamily,
