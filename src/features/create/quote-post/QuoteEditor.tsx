@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Input from "../../../components/ui/Input";
 import Textarea from "../../../components/ui/Textarea";
 import Select from "../../../components/ui/Select";
@@ -81,7 +81,7 @@ function QuoteEditor({
   const [quote, setQuote] = useState(initialQuote);
   const [author, setAuthor] = useState(initialAuthor);
 
-  const [fontSize, setFontSize] = useState(48);
+  const [fontSize, setFontSize] = useState(20);
   const [fontFamily, setFontFamily] = useState("Inter");
   const [textAlign, setTextAlign] = useState<TextAlign>("center");
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
@@ -100,39 +100,39 @@ function QuoteEditor({
    *
    * Runs ONLY once.
    */
-  useEffect(() => {
-    const content = contentRef.current;
-    const quoteElement = quoteRef.current;
+  // useEffect(() => {
+  //   const content = contentRef.current;
+  //   const quoteElement = quoteRef.current;
 
-    if (!content || !quoteElement) {
-      return;
-    }
+  //   if (!content || !quoteElement) {
+  //     return;
+  //   }
 
-    const availableWidth = content.clientWidth;
+  //   const availableWidth = content.clientWidth;
 
-    if (!availableWidth) {
-      return;
-    }
+  //   if (!availableWidth) {
+  //     return;
+  //   }
 
-    const maximumSize = 96;
-    const minimumSize = 16;
+  //   const maximumSize = 96;
+  //   const minimumSize = 16;
 
-    let initialSize = Math.min(availableWidth * 0.08, maximumSize);
-    initialSize = Math.max(initialSize, minimumSize);
+  //   let initialSize = Math.min(availableWidth * 0.08, maximumSize);
+  //   initialSize = Math.max(initialSize, minimumSize);
 
-    quoteElement.style.fontSize = `${initialSize}px`;
+  //   quoteElement.style.fontSize = `${initialSize}px`;
 
-    while (
-      (quoteElement.scrollHeight > content.clientHeight ||
-        quoteElement.scrollWidth > content.clientWidth) &&
-      initialSize > minimumSize
-    ) {
-      initialSize -= 1;
-      quoteElement.style.fontSize = `${initialSize}px`;
-    }
+  //   while (
+  //     (quoteElement.scrollHeight > content.clientHeight ||
+  //       quoteElement.scrollWidth > content.clientWidth) &&
+  //     initialSize > minimumSize
+  //   ) {
+  //     initialSize -= 1;
+  //     quoteElement.style.fontSize = `${initialSize}px`;
+  //   }
 
-    setFontSize(initialSize);
-  }, []);
+  //   setFontSize(initialSize);
+  // }, []);
 
   const handleDownload = async () => {
     if (!previewRef.current) {
@@ -206,11 +206,22 @@ function QuoteEditor({
           >
             <div
               ref={contentRef}
-              className="flex h-full w-full min-w-0 flex-col justify-center"
+              className="flex h-full w-full min-w-0 flex-col justify-center gap-5"
               style={{
                 textAlign,
               }}
             >
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute bottom-3 left-1 select-none font-bold leading-none opacity-20"
+                style={{
+                  fontSize: "1.2rem",
+                  color: textColor,
+                  fontFamily,
+                }}
+              >
+                Postframe
+              </div>
               <p
                 ref={quoteRef}
                 className="max-w-full wrap-break-word font-semibold leading-tight"
